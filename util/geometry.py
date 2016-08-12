@@ -1,28 +1,33 @@
 from ..cy.lib import maxDist,minDist
 import numpy as np
 def rotateTo(positions,rot_from,rot_to,transPos=0):
-  #rot_from: 3 element vector defining vector in pos used for the rotation
-  #rot_to: 3 element vector defining the final location of rot_from after rotation
-  rot_to_norm=(rot_to[0]**2.0+rot_to[1]**2.0+rot_to[2]**2.0)**(0.5)
-  rot_to = [rot_to[0]/rot_to_norm,rot_to[1]/rot_to_norm,rot_to[2]/rot_to_norm]
-  rot_from_norm=(rot_from[0]**2.0+rot_from[1]**2.0+rot_from[2]**2.0)**(0.5)
-  rot_from = [rot_from[0]/rot_from_norm,rot_from[1]/rot_from_norm,rot_from[2]/rot_from_norm]
-  
-  #calculate rotation axis and rotation angle
-  rot_axis = np.cross(rot_from,rot_to)/np.linalg.norm(np.cross(rot_from,rot_to))
-  rot_angle = np.arccos(np.dot(rot_to,rot_from))
+  rot_from = np.array(rot_from)
+  rot_to = np.array(rot_to)
+  if all(np.array(rot_from) == np.array(rot_to)):
+    R = np.eye(3)
+  else:
+    #rot_from: 3 element vector defining vector in pos used for the rotation
+    #rot_to: 3 element vector defining the final location of rot_from after rotation
+    rot_to_norm=(rot_to[0]**2.0+rot_to[1]**2.0+rot_to[2]**2.0)**(0.5)
+    rot_to = [rot_to[0]/rot_to_norm,rot_to[1]/rot_to_norm,rot_to[2]/rot_to_norm]
+    rot_from_norm=(rot_from[0]**2.0+rot_from[1]**2.0+rot_from[2]**2.0)**(0.5)
+    rot_from = [rot_from[0]/rot_from_norm,rot_from[1]/rot_from_norm,rot_from[2]/rot_from_norm]
+    
+    #calculate rotation axis and rotation angle
+    rot_axis = np.cross(rot_from,rot_to)/np.linalg.norm(np.cross(rot_from,rot_to))
+    rot_angle = np.arccos(np.dot(rot_to,rot_from))
 
-  #calculate quanterion elements
-  a = np.cos(rot_angle/2.)
-  b = rot_axis[0]*np.sin(rot_angle/2.)
-  c = rot_axis[1]*np.sin(rot_angle/2.)
-  d = rot_axis[2]*np.sin(rot_angle/2.)
+    #calculate quanterion elements
+    a = np.cos(rot_angle/2.)
+    b = rot_axis[0]*np.sin(rot_angle/2.)
+    c = rot_axis[1]*np.sin(rot_angle/2.)
+    d = rot_axis[2]*np.sin(rot_angle/2.)
 
-  #construct rotation matrix
-  R1 = np.array([a**2+b**2-c**2-d**2,2*(b*c-a*d),2*(b*d+a*c)])
-  R2 = np.array([2*(b*c+a*d),a**2+c**2-b**2-d**2,2*(c*d-a*b)])
-  R3 = np.array([2*(b*d-a*c),2*(c*d+a*b),a**2+d**2-b**2-c**2])
-  R = np.vstack((R1,R2,R3))
+    #construct rotation matrix
+    R1 = np.array([a**2+b**2-c**2-d**2,2*(b*c-a*d),2*(b*d+a*c)])
+    R2 = np.array([2*(b*c+a*d),a**2+c**2-b**2-d**2,2*(c*d-a*b)])
+    R3 = np.array([2*(b*d-a*c),2*(c*d+a*b),a**2+d**2-b**2-c**2])
+    R = np.vstack((R1,R2,R3))
   
   #calculate rotated positions
   rot_pos = np.dot(positions, R.T)

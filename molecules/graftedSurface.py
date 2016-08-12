@@ -1,10 +1,11 @@
 from molecule import molecule
-from typy.creator.util import sphereVol
 from itertools import cycle
 from random import shuffle,choice,randint
 import copy 
 import numpy as np
 from chain import chain
+from ..util import sphereVol
+from ..util.geometry import rotateTo
 
 
 #class factory is used to make invocation a bit more intuitive
@@ -25,7 +26,7 @@ class graftedSurface(molecule):
                ny=1,
                dy=1,
                shuffleSequence=False):
-    super(eqdGraftedSurface,self).__init__()
+    super(graftedSurface,self).__init__()
     self.name='graftedSurface'
     self.placed=False 
     self.natoms=0
@@ -71,9 +72,23 @@ class graftedSurface(molecule):
       getattr(graft,chainPosFunc)()
       topGraft = copy.deepcopy(graft)
       botGraft = copy.deepcopy(graft)
+      # print '=============='
+      # print topGraft.positions[np.array(topGraft.types)==2]
 
       topAnchor = topAnchorList.pop()
       botAnchor = botAnchorList.pop()
+
+      R = np.eye(3)
+      R[2,2] = -1
+      botGraft.positions = np.dot(botGraft.positions,R)
+
+      # topGraftVec = topGraft.positions[1] - topGraft.positions[0]
+      # botGraftVec = botGraft.positions[1] - botGraft.positions[0]
+      # topAnchorVec = [0,0,1]
+      # botAnchorVec = [0,0,-1]
+      # import ipdb; ipdb.set_trace()
+      # topGraft.positions = rotateTo(topGraft.positions,topGraftVec,topAnchorVec)
+      # botGraft.positions = rotateTo(botGraft.positions,botGraftVec,botAnchorVec)
 
       topPos = np.array(topAnchor)
       botPos = np.array(botAnchor)
@@ -82,7 +97,7 @@ class graftedSurface(molecule):
       botPos[2] -= 1.13*(surfObj.diameter+1.0)/2.0
 
       topDiff = np.subtract(topPos,topGraft.positions[0])
-      botDiff = np.subtract(botPos,botGraft.positions[-1])
+      botDiff = np.subtract(botPos,botGraft.positions[0])
 
       topGraft.positions = np.add(topGraft.positions,topDiff)
       botGraft.positions = np.add(botGraft.positions,botDiff)
@@ -96,7 +111,7 @@ class graftedSurface(molecule):
       self.beadVol+=sphereVol(surfObj.diameter)
       self.bonds.append([bT, self.natoms-1,self.natoms])
       self.addMolecule(topGraft)
-      self.beadVol+=sphereVol()*graft_length
+      self.beadVol+=sphereVol()*topGraft.natoms
 
       self.positions.append(botAnchor)
       self.types.append(surfObj.topType) #topType is on purpose for visualization
@@ -106,6 +121,6 @@ class graftedSurface(molecule):
       self.beadVol+=sphereVol(surfObj.diameter)
       self.bonds.append([bT, self.natoms-1,self.natoms])
       self.addMolecule(botGraft)
-      self.beadVol+=sphereVol()*graft_length
+      self.beadVol+=sphereVol()*botGraft.natoms
 
     self.positions = np.array(self.positions)
