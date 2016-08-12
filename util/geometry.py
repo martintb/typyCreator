@@ -1,3 +1,4 @@
+from ..cy.lib import maxDist,minDist
 import numpy as np
 def rotateTo(positions,rot_from,rot_to,transPos=0):
   #rot_from: 3 element vector defining vector in pos used for the rotation

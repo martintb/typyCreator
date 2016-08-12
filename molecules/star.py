@@ -4,34 +4,31 @@ from random import shuffle
 from itertools import cycle
 from molecule import molecule
 from chain import chain
-from sphere import sphere
+from bead import bead
 from ..util import sphereVol
 from ..util.geometry import rotateTo
 
 
 #class factory is used to make invocation a bit more intuitive
 def create(*args,**kwargs):
-  return graftedSphere(*args,**kwargs)
+  return star(*args,**kwargs)
 
-class graftedSphere(molecule):
+class star(molecule):
   def __init__(self, 
                chainObj,
                chainKwargs,
                chainPosFunc,
+               coreType,
                chainLengths=None,
                diameter=5,
                num_grafts=51, 
                angleType=None,
-               anchorType='D',
-               surfaceType='E',
-               particleType='F',
-               shuffleSequence=False,
-               makeLinear=True,
                bondType=1,
+               shuffleSequence=False,
                makeMolecules=False,
                ):
-    super(graftedSphere,self).__init__()
-    self.name='graftedSphere'
+    super(star,self).__init__()
+    self.name='star'
     self.placed=False 
     self.natoms=0
     self.positions=[]
@@ -44,9 +41,7 @@ class graftedSphere(molecule):
     self.beadVol=0
     idCount = 0
 
-    core = sphere(diameter=diameter, type=[particleType],bondType=bondType)
-    core.addBeads(radius=diameter/2.0-0.5, type=[surfaceType])
-    core.addBeads(radius=diameter/2.0-0.5, type=[anchorType], num_beads=num_grafts)
+    core = bead(diameter=[diameter], type=[coreType])
     self.addMolecule(core)
     self.beadVol+=sphereVol(diameter)
 
@@ -55,6 +50,9 @@ class graftedSphere(molecule):
       idCount += 1
 
     anchorIndex=copy.deepcopy(self.natoms)-1
+    anchorVecs = np.random.random((num_grafts,3))-0.5
+    anchorNorm  = (diameter+1.0)/2.0/np.linalg.norm(anchorVecs,axis=1)
+    anchorVecs *= anchorNorm[:,np.newaxis]
     if chainLengths is not None:
       chainLengthIter=cycle(chainLengths)
     for i in range(num_grafts):
@@ -70,19 +68,13 @@ class graftedSphere(molecule):
         idCount += 1
 
       index=int(-1*(i+1))
-      anchorVec=core.positions[index]
+      anchorVec= anchorVecs[index]
       graftVec = graft.positions[1]-graft.positions[0]
+      graft.positions = rotateTo(graft.positions,graftVec,anchorVec,transPos=anchorVec)
 
-      anchorNorm=(anchorVec[0]**2.0+anchorVec[1]**2.0+anchorVec[2]**2.0)**(0.5)
-      monomer1Pos=[anchorVec[0]*(diameter/2.0+1.4-0.5)/anchorNorm,
-                   anchorVec[1]*(diameter/2.0+1.4-0.5)/anchorNorm,
-                   anchorVec[2]*(diameter/2.0+1.4-0.5)/anchorNorm]
-      
-      graft.positions = rotateTo(graft.positions,graftVec,anchorVec,transPos=monomer1Pos)
-
-      self.bonds.extend([[bondType, anchorIndex,self.natoms]])
+      self.bonds.extend([[bondType, 0,self.natoms]])
       if angleType:
-        self.angles.extend([[angleType, anchorIndex,self.natoms,self.natoms+1]])
+        self.angles.extend([[angleType, 0,self.natoms,self.natoms+1]])
       anchorIndex-=1
       self.addMolecule(graft)
       self.beadVol+=graft.beadVol
