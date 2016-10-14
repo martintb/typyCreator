@@ -1,5 +1,24 @@
 # typyCreator #
 
+The goal of typyCreator is to be able to create a wide number of random and customized intial configurations for coarse-grained MD and MC simulations of various molecules and building blocks. As much as possible, smaller building blocks are used to "build-up" larger building blocks e.g. the chain and sphere classes are used to build the graftedSphere molecule. 
+
+In lieu of true documentation (for the time being), see the script below as an example of the usage. 
+
+## Partial Listing of Supported Building Blocks ##
+* bead
+* chain
+* surface
+* star
+* sphere
+* graftedSphere
+* graftedSurface
+* graftedSurfaceAlt
+* janusGraftedSphere
+* stickyBead
+* stickyBeadChain
+* rodCoil
+* water
+
 ## Example Python Script ##
 The following script creates a binary system:
 
