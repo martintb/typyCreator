@@ -25,6 +25,7 @@ class graftedSurface(molecule):
                dx=1,
                ny=1,
                dy=1,
+               anchorType='E',
                shuffleSequence=False):
     super(graftedSurface,self).__init__()
     self.name='graftedSurface'
@@ -39,8 +40,9 @@ class graftedSurface(molecule):
     self.angles=[]
     self.beadVol=0
 
-    self.addMolecule(surfObj)
-    self.beadVol += surfObj.beadVol
+    if surfObj is not None:
+      self.addMolecule(surfObj)
+      self.beadVol += surfObj.beadVol
 
     if nx*ny<num_grafts:
       print '.:: Number graft anchors must be at least equal to number of grafts!'
@@ -48,13 +50,17 @@ class graftedSurface(molecule):
 
     topZ = np.unique(surfObj.positions[:,2]).max()
     botZ = np.unique(surfObj.positions[:,2]).min()
+    maxSurfX = np.unique(surfObj.positions[:,0]).max()
+    maxSurfY = np.unique(surfObj.positions[:,1]).max()
+    xOffset = (maxSurfX - (nx-1)*dx)/2.0
+    yOffset = (maxSurfY - (ny-1)*dy)/2.0
 
     topAnchorList = []
     botAnchorList = []
     for yi in range(ny):
       for xi in range(nx):
-        x = xi*dx
-        y = yi*dy
+        x = xi*dx + xOffset
+        y = yi*dy + yOffset
         topAnchorList.append([x,y,topZ])
         botAnchorList.append([x,y,botZ])
     shuffle(topAnchorList)
@@ -104,7 +110,7 @@ class graftedSurface(molecule):
 
       bT = bondTypeIter.next()
       self.positions.append(topAnchor)
-      self.types.append(surfObj.botType) #botType is on purpose for visualization
+      self.types.append(anchorType)
       self.diameters.append(surfObj.diameter)
       self.bodies.append(0)
       self.natoms+=1
@@ -114,7 +120,7 @@ class graftedSurface(molecule):
       self.beadVol+=sphereVol()*topGraft.natoms
 
       self.positions.append(botAnchor)
-      self.types.append(surfObj.topType) #topType is on purpose for visualization
+      self.types.append(anchorType)
       self.diameters.append(surfObj.diameter)
       self.bodies.append(0)
       self.natoms+=1

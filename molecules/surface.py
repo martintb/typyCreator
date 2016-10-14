@@ -7,7 +7,7 @@ def create(*args,**kwargs):
   return surface(*args,**kwargs)
 
 class surface(molecule):
-  def __init__(self, nx=5, ny=5, nz=3, diameter=1.0, topType='A',botType='B',midType='C'):
+  def __init__(self, nx=5, ny=5, nz=3, diameter=1.0, topType='A',botType='B',midType='C',shift=True):
     super(surface,self).__init__()
     self.name='surface'
     self.placed=False
@@ -45,5 +45,7 @@ class surface(molecule):
           else:
             self.types.append(midType)
     self.positions = np.array(self.positions)
+    if shift:
+      self.positions[:,2] -= np.average(self.positions,axis=0)[2]
 
 
