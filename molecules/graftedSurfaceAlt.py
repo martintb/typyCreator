@@ -1,5 +1,5 @@
 from molecule import molecule
-from typy.creator.util import sphereVol
+from typyCreator.util import sphereVol
 from itertools import cycle
 from random import shuffle,choice,randint
 import copy 

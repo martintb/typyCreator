@@ -1,5 +1,5 @@
 from molecule import molecule
-from typy.creator.util import sphereVol
+from typyCreator.util import sphereVol
 import numpy as np
 from chain import chain
 

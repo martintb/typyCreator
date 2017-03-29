@@ -7,7 +7,7 @@ from ..util import overPrint
 from ..cy.lib import minDist,minDistCheck
 
 class python_placer(object):
-  def placeMolecules(self, placement={},postFitBox=True,wrap=True):
+  def placeMolecules(self, placement={},postFitBox=True,wrap=True,overlapCheck=True):
     pstr = 'Placing molecule {{:d}} / {:d}'.format(len(self.molecules))
     for i,trialMol in enumerate(self.molecules,start=1):
       if not trialMol.placed:
@@ -15,10 +15,11 @@ class python_placer(object):
         molType = ''.join([str(st) for st in sorted(np.unique(trialMol.types))])
         trialPos = self.getTrialPos(molType, placement)
         trialMol.translateCOM(trialPos, L=self.box.lx)
-        while self.overlaps(trialMol):
-          molType = ''.join([str(st) for st in sorted(np.unique(trialMol.types))])
-          trialPos = self.getTrialPos(molType, placement)
-          trialMol.translateCOM(trialPos, L=self.box.lx)
+        if overlapCheck:
+          while self.overlaps(trialMol):
+            molType = ''.join([str(st) for st in sorted(np.unique(trialMol.types))])
+            trialPos = self.getTrialPos(molType, placement)
+            trialMol.translateCOM(trialPos, L=self.box.lx)
         trialMol.placed=True
     print ''
     if postFitBox:

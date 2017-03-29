@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from typy.misc import overPrint
+from typyCreator.util import overPrint
 from ..util.box import box
 from ..placers.python_placer import python_placer
 from ..placers.external_placer import external_placer
